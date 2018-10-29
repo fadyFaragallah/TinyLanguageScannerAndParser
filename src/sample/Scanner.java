@@ -1,26 +1,21 @@
 package sample;
 
+
+import javafx.scene.control.TextArea;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 public class Scanner {
-    private String outputFilePath;
-    private PrintWriter pw;
+    private TextArea outputTextArea;
     public Scanner(){
 
-        this.outputFilePath="";
+        this.outputTextArea=null;
     }
-    public Scanner(String outputFilePath) {
-        this.outputFilePath = outputFilePath;
+    public Scanner(TextArea t1) {
+        this.outputTextArea = t1;
 }
-    public String getOutputFilePath() {
-        return outputFilePath;
-    }
-
-    public void setOutputFilePath(String outputFilePath) {
-        this.outputFilePath = outputFilePath;
-    }
     private static boolean isAReservedWord(String input){
         String reservedWords[]={"if","then","else","end","repeat","until","read","write"};
         for(int i=0;i<reservedWords.length;i++){
@@ -39,7 +34,7 @@ public class Scanner {
             return true;
         return false;
     }
-    public void scan(String input,PrintWriter pw) {
+    public void scan(String input) {
      String state="start";
         for(int i=0;i<input.length();i++){
             if(state.equals("start") && input.charAt(i)==' '){
@@ -66,7 +61,8 @@ public class Scanner {
                     i++;
                 }
                 t.setValue(number.toString());
-                pw.println(t);
+                outputTextArea.appendText(t.toString());
+                outputTextArea.appendText("\n");
                 if(i<input.length())
                     i--;
                 state="start";
@@ -87,7 +83,8 @@ public class Scanner {
                 }
                 else
                     t.setType("identifier");
-                pw.println(t);
+                outputTextArea.appendText(t.toString());
+                outputTextArea.appendText("\n");
                 if(i<input.length())
                     i--;
                 state="start";
@@ -99,7 +96,8 @@ public class Scanner {
                     Token t=new Token();
                     t.setType("special symbol");
                     t.setValue(":=");
-                    pw.println(t);
+                    outputTextArea.appendText(t.toString());
+                    outputTextArea.appendText("\n");
                 }
                 else
                     i--;
@@ -111,11 +109,11 @@ public class Scanner {
                 s.append(input.charAt(i));
                 t.setType("special symbol");
                 t.setValue(s.toString());
-                pw.println(t);
+                outputTextArea.appendText(t.toString());
+                outputTextArea.appendText("\n");
                 state="start";
             }
 
         }
     }
 }
-//else if(state.equals("") && input.charAt(i))

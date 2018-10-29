@@ -1,21 +1,26 @@
 package sample;
 
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 
 import java.io.*;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class Controller {
+public class Controller implements Initializable{
     @FXML private Button inputFileButton;
-    @FXML private Button outputFileButton;
     @FXML private TextField inputTextField;
-    @FXML private TextField outputTextField;
+    @FXML private TextArea outputTextArea;
     @FXML private Button ScanButton;
-
+    public void initialize(URL url, ResourceBundle rb){
+        outputTextArea.setEditable(false);
+    }
     public void inputButtonClicked(){
-        FileChooser fc=new FileChooser();
+                FileChooser fc=new FileChooser();
         fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text files","*.txt"));
         File selectedFile =fc.showOpenDialog(null);
         if(selectedFile !=null){
@@ -26,32 +31,17 @@ public class Controller {
             alertBox.display("Error","an error occured");
         }
     }
-    public void outputButtonClicked(){
-        FileChooser fc=new FileChooser();
-        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text files","*.txt"));
-        File selectedFile =fc.showOpenDialog(null);
-        if(selectedFile !=null){
-            outputTextField.setText(selectedFile.getAbsolutePath());
-        }
-        else{
-            //error
-            AlertBox alertBox=new AlertBox();
-            alertBox.display("Error","an error occured");
-        }
-    }
     public void Scan() {
-        Scanner scanner = new Scanner(outputTextField.getText());
+        Scanner scanner = new Scanner(outputTextArea);
+        outputTextArea.clear();
         try {
             FileReader fr = new FileReader(inputTextField.getText());
             BufferedReader br=new BufferedReader(fr);
             String str;
-            FileWriter fw=new FileWriter(outputTextField.getText());
-            PrintWriter pw=new PrintWriter(fw);
             while((str=br.readLine()) !=null) {
-                scanner.scan(str,pw);
+                scanner.scan(str);
             }
             br.close();
-            pw.close();
         } catch (IOException e) {
             AlertBox alertBox=new AlertBox();
             alertBox.display("Error","an error occured");
