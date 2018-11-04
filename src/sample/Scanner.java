@@ -44,7 +44,7 @@ public class Scanner {
         for (int i = 0; i < input.length(); i++) {
             switch (state) {
                 case START:
-                    if (input.charAt(i) == ' ')
+                    if (input.charAt(i) == ' ' || input.charAt(i)=='\t' )
                         state = STATE_TYPES.START;
                     else if (input.charAt(i) == '{') {
                         state = STATE_TYPES.INCOMMENT;
