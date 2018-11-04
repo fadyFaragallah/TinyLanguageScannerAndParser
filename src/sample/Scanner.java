@@ -73,7 +73,7 @@ public class Scanner {
                     if (isADigit(input.charAt(i))) {
                         s.append(input.charAt(i));
                         state = STATE_TYPES.INNUM;
-                    } else if (input.charAt(i) == ' ' || i == input.length() - 1) {
+                    } else if (input.charAt(i) == ' ' || i == input.length() - 1 || input.charAt(i)==';') {
                         state = STATE_TYPES.DONE;
                         i--;
                     } else {
