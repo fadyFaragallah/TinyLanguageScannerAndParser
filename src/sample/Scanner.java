@@ -3,14 +3,10 @@ package sample;
 
 import javafx.scene.control.TextArea;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 public class Scanner {
     private TextArea outputTextArea;
-    private static enum STATE_TYPES{
-            START,INCOMMENT,INNUM,INID,INASSIGN,DONE
+    private enum STATE_TYPES{
+            START,INCOMMENT,INNUM,INID,INASSIGN
     }
     public Scanner(){
         this.outputTextArea=null;
@@ -51,16 +47,34 @@ public class Scanner {
                         t.setType(Constants.NUMBER);
                         s.append(input.charAt(i));
                         state = STATE_TYPES.INNUM;
+                        if (i == input.length() - 1) {
+                            t.setValue(s.toString());
+                            outputTextArea.appendText(t.toString());
+                            outputTextArea.appendText("\n");
+                        }
                     } else if (isALetter(input.charAt(i))) {
                         s.append(input.charAt(i));
                         state = STATE_TYPES.INID;
-                    } else if (input.charAt(i) == ':') {
+                        if (i == input.length() - 1) {
+                            t.setValue(s.toString());
+                            if (isAReservedWord(s.toString()))
+                                t.setType(Constants.RESERVED_WORD);
+                            else
+                                t.setType(Constants.IDENTIFIER);
+                            outputTextArea.appendText(t.toString());
+                            outputTextArea.appendText("\n");
+                        }
+                    }
+                    else if (input.charAt(i) == ':') {
                         s.append(input.charAt(i));
                         state = STATE_TYPES.INASSIGN;
                     } else {
-                        state = STATE_TYPES.DONE;
                         t.setType(Constants.SPECIAL_SYMBOL);
                         s.append(input.charAt(i));
+                        t.setValue(s.toString());
+                        s.delete(0, s.length());
+                        outputTextArea.appendText(t.toString());
+                        outputTextArea.appendText("\n");
                     }
                     break;
                 case INCOMMENT:
@@ -73,53 +87,66 @@ public class Scanner {
                     if (isADigit(input.charAt(i))) {
                         s.append(input.charAt(i));
                         state = STATE_TYPES.INNUM;
-                    } else if (input.charAt(i) == ' ' || i == input.length() - 1 || input.charAt(i)==';') {
-                        state = STATE_TYPES.DONE;
+                        if (i == input.length() - 1) {
+                            t.setValue(s.toString());
+                            outputTextArea.appendText(t.toString());
+                            outputTextArea.appendText("\n");
+                        }
+                    }
+                    else {
+                        t.setValue(s.toString());
                         i--;
-                    } else {
-                        //error
+                        s.delete(0, s.length());
+                        state = STATE_TYPES.START;
+                        outputTextArea.appendText(t.toString());
+                        outputTextArea.appendText("\n");
                     }
                     break;
                 case INID:
                     if (isALetter(input.charAt(i))) {
                         s.append(input.charAt(i));
                         state = STATE_TYPES.INID;
-                        if(i==input.length()-1){
+                        if (i == input.length() - 1) {
                             t.setValue(s.toString());
-                            t.setType(Constants.RESERVED_WORD);
-                            s.delete(0, s.length());
-                            state = STATE_TYPES.START;
+                            if (isAReservedWord(s.toString()))
+                                t.setType(Constants.RESERVED_WORD);
+                            else
+                                t.setType(Constants.IDENTIFIER);
                             outputTextArea.appendText(t.toString());
                             outputTextArea.appendText("\n");
                         }
-                    } else if (input.charAt(i) == ' ' || i == input.length() - 1 || input.charAt(i)==';') {
-                        state = STATE_TYPES.DONE;
+                    }
+                        else {
+                        t.setValue(s.toString());
                         i--;
                         if (isAReservedWord(s.toString()))
                             t.setType(Constants.RESERVED_WORD);
                         else
                             t.setType(Constants.IDENTIFIER);
-                    } else {
-                        //error
+                        s.delete(0, s.length());
+                        state = STATE_TYPES.START;
+                        outputTextArea.appendText(t.toString());
+                        outputTextArea.appendText("\n");
                     }
                     break;
                 case INASSIGN:
                     if (input.charAt(i) == '=') {
-                        state = STATE_TYPES.DONE;
                         s.append(input.charAt(i));
                         t.setType(Constants.SPECIAL_SYMBOL);
+                        t.setValue(s.toString());
+                        s.delete(0, s.length());
+                        state = STATE_TYPES.START;
+                        outputTextArea.appendText(t.toString());
+                        outputTextArea.appendText("\n");
+
                     } else {
-                        state = STATE_TYPES.DONE;
+                        s.delete(0, s.length());
+                        state = STATE_TYPES.START;
+                        outputTextArea.appendText(t.toString());
+                        outputTextArea.appendText("\n");
                         i--;
                     }
                     break;
-                case DONE:
-                    t.setValue(s.toString());
-                    i--;
-                    s.delete(0, s.length());
-                    state = STATE_TYPES.START;
-                    outputTextArea.appendText(t.toString());
-                    outputTextArea.appendText("\n");
             }
         }
 
