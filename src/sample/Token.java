@@ -27,6 +27,6 @@ public class Token {
     }
     @Override
     public String toString(){
-        return this.value + ":" + this.type;
+        return this.value + " : " + this.type;
     }
 }

@@ -9,8 +9,10 @@ import java.io.PrintWriter;
 
 public class Scanner {
     private TextArea outputTextArea;
+    private static enum STATE_TYPES{
+            START,INCOMMENT,INNUM,INID,INASSIGN,DONE
+    }
     public Scanner(){
-
         this.outputTextArea=null;
     }
     public Scanner(TextArea t1) {
@@ -35,85 +37,91 @@ public class Scanner {
         return false;
     }
     public void scan(String input) {
-     String state="start";
-        for(int i=0;i<input.length();i++){
-            if(state.equals("start") && input.charAt(i)==' '){
-                state="start";
-            }
-            else if(state.equals("start") && input.charAt(i)=='{'){
-                state="incomment";
-            }
-            else if(state.equals("incomment") && input.charAt(i)!='}'){
-                state="incomment";
-            }
-            else if(state.equals("incomment") && input.charAt(i)=='}'){
-                state="start";
-            }
-            else if(state.equals("start") && (isADigit(input.charAt(i)))){
-                state="innum";
-                StringBuilder number=new StringBuilder();
-                number.append(input.charAt(i));
-                Token t=new Token();
-                t.setType("number");
-                i++;
-                while((i<input.length()) && (isADigit(input.charAt(i)))){
-                    number.append(input.charAt(i));
-                    i++;
-                }
-                t.setValue(number.toString());
-                outputTextArea.appendText(t.toString());
-                outputTextArea.appendText("\n");
-                if(i<input.length())
+        STATE_TYPES state = STATE_TYPES.START;
+        Token t=new Token();
+        StringBuilder s=new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            switch (state) {
+                case START:
+                    if (input.charAt(i) == ' ')
+                        state = STATE_TYPES.START;
+                    else if (input.charAt(i) == '{')
+                        state = STATE_TYPES.INCOMMENT;
+                    else if (isADigit(input.charAt(i))) {
+                        t.setType(Constants.NUMBER);
+                        s.append(input.charAt(i));
+                        state = STATE_TYPES.INNUM;
+                    } else if (isALetter(input.charAt(i))) {
+                        s.append(input.charAt(i));
+                        state = STATE_TYPES.INID;
+                    } else if (input.charAt(i) == ':') {
+                        s.append(input.charAt(i));
+                        state = STATE_TYPES.INASSIGN;
+                    } else {
+                        state = STATE_TYPES.DONE;
+                        t.setType(Constants.SPECIAL_SYMBOL);
+                        s.append(input.charAt(i));
+                    }
+                    break;
+                case INCOMMENT:
+                    if (input.charAt(i) != '}') {
+                        state = STATE_TYPES.INCOMMENT;
+                    } else
+                        state = STATE_TYPES.START;
+                    break;
+                case INNUM:
+                    if (isADigit(input.charAt(i))) {
+                        s.append(input.charAt(i));
+                        state = STATE_TYPES.INNUM;
+                    } else if (input.charAt(i) == ' ' || i == input.length() - 1) {
+                        state = STATE_TYPES.DONE;
+                        i--;
+                    } else {
+                        //error
+                    }
+                    break;
+                case INID:
+                    if (isALetter(input.charAt(i))) {
+                        s.append(input.charAt(i));
+                        state = STATE_TYPES.INID;
+                        if(i==input.length()-1){
+                            t.setValue(s.toString());
+                            t.setType(Constants.RESERVED_WORD);
+                            s.delete(0, s.length());
+                            state = STATE_TYPES.START;
+                            outputTextArea.appendText(t.toString());
+                            outputTextArea.appendText("\n");
+                        }
+                    } else if (input.charAt(i) == ' ' || i == input.length() - 1 || input.charAt(i)==';') {
+                        state = STATE_TYPES.DONE;
+                        i--;
+                        if (isAReservedWord(s.toString()))
+                            t.setType(Constants.RESERVED_WORD);
+                        else
+                            t.setType(Constants.IDENTIFIER);
+                    } else {
+                        //error
+                    }
+                    break;
+                case INASSIGN:
+                    if (input.charAt(i) == '=') {
+                        state = STATE_TYPES.DONE;
+                        s.append(input.charAt(i));
+                        t.setType(Constants.SPECIAL_SYMBOL);
+                    } else {
+                        state = STATE_TYPES.DONE;
+                        i--;
+                    }
+                    break;
+                case DONE:
+                    t.setValue(s.toString());
                     i--;
-                state="start";
-            }
-            else if((state.equals("start")) && (isALetter(input.charAt(i)))){
-                state="inid";
-                StringBuilder id=new StringBuilder();
-                id.append(input.charAt(i));
-                Token t=new Token();
-                i++;
-                while((i<input.length()) && isALetter(input.charAt(i))){
-                    id.append(input.charAt(i));
-                    i++;
-                }
-                t.setValue(id.toString());
-                if(isAReservedWord(id.toString())){
-                    t.setType("reserved word");
-                }
-                else
-                    t.setType("identifier");
-                outputTextArea.appendText(t.toString());
-                outputTextArea.appendText("\n");
-                if(i<input.length())
-                    i--;
-                state="start";
-            }
-            else if(state.equals("start") && input.charAt(i)==':'){
-                state="inassign";
-                i++;
-                if(input.charAt(i)=='='){
-                    Token t=new Token();
-                    t.setType("special symbol");
-                    t.setValue(":=");
+                    s.delete(0, s.length());
+                    state = STATE_TYPES.START;
                     outputTextArea.appendText(t.toString());
                     outputTextArea.appendText("\n");
-                }
-                else
-                    i--;
-                state="start";
             }
-            else{
-                Token t=new Token();
-                StringBuilder s=new StringBuilder();
-                s.append(input.charAt(i));
-                t.setType("special symbol");
-                t.setValue(s.toString());
-                outputTextArea.appendText(t.toString());
-                outputTextArea.appendText("\n");
-                state="start";
-            }
-
         }
+
     }
 }
