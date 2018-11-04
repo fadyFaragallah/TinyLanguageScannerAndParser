@@ -8,6 +8,7 @@ public class Scanner {
     private enum STATE_TYPES{
             START,INCOMMENT,INNUM,INID,INASSIGN
     }
+    private static boolean inComment=false;
     public Scanner(){
         this.outputTextArea=null;
     }
@@ -33,7 +34,11 @@ public class Scanner {
         return false;
     }
     public void scan(String input) {
-        STATE_TYPES state = STATE_TYPES.START;
+        STATE_TYPES state;
+        if(inComment)
+            state=STATE_TYPES.INCOMMENT;
+        else
+            state = STATE_TYPES.START;
         Token t=new Token();
         StringBuilder s=new StringBuilder();
         for (int i = 0; i < input.length(); i++) {
@@ -41,8 +46,11 @@ public class Scanner {
                 case START:
                     if (input.charAt(i) == ' ')
                         state = STATE_TYPES.START;
-                    else if (input.charAt(i) == '{')
+                    else if (input.charAt(i) == '{') {
                         state = STATE_TYPES.INCOMMENT;
+                        if(i==input.length()-1)
+                            inComment=true;
+                    }
                     else if (isADigit(input.charAt(i))) {
                         t.setType(Constants.NUMBER);
                         s.append(input.charAt(i));
@@ -73,6 +81,20 @@ public class Scanner {
                         s.append(input.charAt(i));
                         t.setValue(s.toString());
                         s.delete(0, s.length());
+                        if(input.charAt(i)=='+')
+                            t.setType(t.getType() + Constants.PLUS);
+                        else if(input.charAt(i)=='-')
+                            t.setType(t.getType() + Constants.MINUS);
+                        else if(input.charAt(i)=='*')
+                            t.setType(t.getType() + Constants.MULTIPLY);
+                        else if(input.charAt(i)=='/')
+                            t.setType(t.getType() + Constants.DIVIDE);
+                        else if(input.charAt(i)=='(')
+                            t.setType(t.getType() + Constants.OPENING_BRACKET);
+                        else if(input.charAt(i)==')')
+                            t.setType(t.getType() + Constants.CLOSING_BRACKET);
+                        else if (input.charAt(i)=='<')
+                            t.setType(t.getType() + Constants.SMALLER_THAN);
                         outputTextArea.appendText(t.toString());
                         outputTextArea.appendText("\n");
                     }
@@ -80,8 +102,12 @@ public class Scanner {
                 case INCOMMENT:
                     if (input.charAt(i) != '}') {
                         state = STATE_TYPES.INCOMMENT;
-                    } else
+                        if(i==input.length()-1)
+                            inComment=true;
+                    } else {
+                        inComment=false;
                         state = STATE_TYPES.START;
+                    }
                     break;
                 case INNUM:
                     if (isADigit(input.charAt(i))) {
@@ -132,7 +158,7 @@ public class Scanner {
                 case INASSIGN:
                     if (input.charAt(i) == '=') {
                         s.append(input.charAt(i));
-                        t.setType(Constants.SPECIAL_SYMBOL);
+                        t.setType(Constants.ASSIGN);
                         t.setValue(s.toString());
                         s.delete(0, s.length());
                         state = STATE_TYPES.START;
