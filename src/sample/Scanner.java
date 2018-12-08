@@ -3,18 +3,21 @@ package sample;
 
 import javafx.scene.control.TextArea;
 
+import java.util.ArrayList;
+
 public class Scanner {
-    private TextArea outputTextArea;
+    private ArrayList<Token> tokens;
+
     private enum STATE_TYPES{
-            START,INCOMMENT,INNUM,INID,INASSIGN
+        START,INCOMMENT,INNUM,INID,INASSIGN
     }
     private static boolean inComment=false;
     public Scanner(){
-        this.outputTextArea=null;
+        this.tokens=null;
     }
-    public Scanner(TextArea t1) {
-        this.outputTextArea = t1;
-}
+    public Scanner(ArrayList<Token> t1) {
+        this.tokens = t1;
+    }
     private static boolean isAReservedWord(String input){
         String reservedWords[]={"if","then","else","end","repeat","until","read","write"};
         for(int i=0;i<reservedWords.length;i++){
@@ -57,8 +60,8 @@ public class Scanner {
                         state = STATE_TYPES.INNUM;
                         if (i == input.length() - 1) {
                             t.setValue(s.toString());
-                            outputTextArea.appendText(t.toString());
-                            outputTextArea.appendText("\n");
+                            Token temp=new Token(t.getType(),t.getValue());
+                            tokens.add(temp);
                         }
                     } else if (isALetter(input.charAt(i))) {
                         s.append(input.charAt(i));
@@ -69,8 +72,8 @@ public class Scanner {
                                 t.setType(Constants.RESERVED_WORD);
                             else
                                 t.setType(Constants.IDENTIFIER);
-                            outputTextArea.appendText(t.toString());
-                            outputTextArea.appendText("\n");
+                            Token temp=new Token(t.getType(),t.getValue());
+                            tokens.add(temp);
                         }
                     }
                     else if (input.charAt(i) == ':') {
@@ -95,8 +98,8 @@ public class Scanner {
                             t.setType(t.getType() + Constants.CLOSING_BRACKET);
                         else if (input.charAt(i)=='<')
                             t.setType(t.getType() + Constants.SMALLER_THAN);
-                        outputTextArea.appendText(t.toString());
-                        outputTextArea.appendText("\n");
+                        Token temp=new Token(t.getType(),t.getValue());
+                        tokens.add(temp);
                     }
                     break;
                 case INCOMMENT:
@@ -115,8 +118,8 @@ public class Scanner {
                         state = STATE_TYPES.INNUM;
                         if (i == input.length() - 1) {
                             t.setValue(s.toString());
-                            outputTextArea.appendText(t.toString());
-                            outputTextArea.appendText("\n");
+                            Token temp=new Token(t.getType(),t.getValue());
+                            tokens.add(temp);
                         }
                     }
                     else {
@@ -124,8 +127,8 @@ public class Scanner {
                         i--;
                         s.delete(0, s.length());
                         state = STATE_TYPES.START;
-                        outputTextArea.appendText(t.toString());
-                        outputTextArea.appendText("\n");
+                        Token temp=new Token(t.getType(),t.getValue());
+                        tokens.add(temp);
                     }
                     break;
                 case INID:
@@ -138,11 +141,11 @@ public class Scanner {
                                 t.setType(Constants.RESERVED_WORD);
                             else
                                 t.setType(Constants.IDENTIFIER);
-                            outputTextArea.appendText(t.toString());
-                            outputTextArea.appendText("\n");
+                            Token temp=new Token(t.getType(),t.getValue());
+                            tokens.add(temp);
                         }
                     }
-                        else {
+                    else {
                         t.setValue(s.toString());
                         i--;
                         if (isAReservedWord(s.toString()))
@@ -151,8 +154,8 @@ public class Scanner {
                             t.setType(Constants.IDENTIFIER);
                         s.delete(0, s.length());
                         state = STATE_TYPES.START;
-                        outputTextArea.appendText(t.toString());
-                        outputTextArea.appendText("\n");
+                        Token temp=new Token(t.getType(),t.getValue());
+                        tokens.add(temp);
                     }
                     break;
                 case INASSIGN:
@@ -162,14 +165,14 @@ public class Scanner {
                         t.setValue(s.toString());
                         s.delete(0, s.length());
                         state = STATE_TYPES.START;
-                        outputTextArea.appendText(t.toString());
-                        outputTextArea.appendText("\n");
+                        Token temp=new Token(t.getType(),t.getValue());
+                        tokens.add(temp);
 
                     } else {
                         s.delete(0, s.length());
                         state = STATE_TYPES.START;
-                        outputTextArea.appendText(t.toString());
-                        outputTextArea.appendText("\n");
+                        Token temp=new Token(t.getType(),t.getValue());
+                        tokens.add(temp);
                         i--;
                     }
                     break;

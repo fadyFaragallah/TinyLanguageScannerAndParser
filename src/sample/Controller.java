@@ -6,21 +6,24 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable{
     @FXML private Button inputFileButton;
     @FXML private TextField inputTextField;
     @FXML private TextArea outputTextArea;
-    @FXML private Button ScanButton;
+    @FXML private Button ParseButton;
+    private ArrayList<Token> tokens;
     public void initialize(URL url, ResourceBundle rb){
-        outputTextArea.setEditable(false);
+        //outputTextArea.setEditable(false);
     }
     public void inputButtonClicked(){
-                FileChooser fc=new FileChooser();
+        FileChooser fc=new FileChooser();
         fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text files","*.txt"));
         File selectedFile =fc.showOpenDialog(null);
         if(selectedFile !=null){
@@ -31,9 +34,9 @@ public class Controller implements Initializable{
             alertBox.display("Error","an error occured");
         }
     }
-    public void Scan() {
-        Scanner scanner = new Scanner(outputTextArea);
-        outputTextArea.clear();
+    public void scan() {
+        tokens=new ArrayList<>();
+        Scanner scanner = new Scanner(tokens);
         try {
             FileReader fr = new FileReader(inputTextField.getText());
             BufferedReader br=new BufferedReader(fr);
@@ -46,5 +49,20 @@ public class Controller implements Initializable{
             AlertBox alertBox=new AlertBox();
             alertBox.display("Error","an error occured");
         }
+
+        System.out.println(tokens.size());
+        for(int i=0;i<tokens.size();i++){
+            System.out.println(tokens.get(i));
+        }
+    }
+    public void parse(){
+        outputTextArea.clear();
+        scan();
+        Parser p=new Parser(tokens);
+        JSONObject obj=p.parse();
+        outputTextArea.clear();
+        outputTextArea.setText(obj.toString());
+
+
     }
 }

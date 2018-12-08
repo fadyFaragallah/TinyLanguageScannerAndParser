@@ -9,7 +9,7 @@
    <children>
       <Button fx:id="inputFileButton" layoutX="555.0" layoutY="52.0" mnemonicParsing="false" onAction="#inputButtonClicked" text="browse" />
       <TextField fx:id="inputTextField" layoutX="45.0" layoutY="52.0" prefHeight="31.0" prefWidth="463.0" />
-      <Button fx:id="ScanButton" layoutX="374.0" layoutY="655.0" mnemonicParsing="false" onAction="#Scan" text="Scan" />
+      <Button fx:id="ParseButton" layoutX="374.0" layoutY="655.0" mnemonicParsing="false" onAction="#parse" text="Parse" />
       <TextArea fx:id="outputTextArea" layoutX="45.0" layoutY="130.0" prefHeight="461.0" prefWidth="581.0" />
    </children>
 </AnchorPane>
