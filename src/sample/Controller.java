@@ -61,7 +61,11 @@ public class Controller implements Initializable{
         Parser p=new Parser(tokens);
         JSONObject obj=p.parse();
         outputTextArea.clear();
-        outputTextArea.setText(obj.toString());
+        String s=obj.toString();
+        //s.replace('[',' ');
+        //s.replace('[',' ');
+
+        outputTextArea.setText(s);
 
 
     }

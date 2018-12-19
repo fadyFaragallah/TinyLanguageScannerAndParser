@@ -39,7 +39,8 @@ public class Parser {
         if(tokens.get(currentIndex).getType().equals(s))
             currentIndex++;
         else{
-            //error
+            AlertBox alertBox=new AlertBox();
+            alertBox.display("Error","syntax error");
         }
     }
 
@@ -47,7 +48,8 @@ public class Parser {
         if(tokens.get(currentIndex).getValue().equals(tokenValue))
             currentIndex++;
         else{
-            //error
+            AlertBox alertBox=new AlertBox();
+            alertBox.display("Error","syntax error");
         }
     }
 
@@ -89,7 +91,8 @@ public class Parser {
         else if(tokens.get(currentIndex).getValue().equals("write"))
             write_stmt();
         else{
-            //error
+            AlertBox alertBox=new AlertBox();
+            alertBox.display("Error","syntax error");
         }
     }
 
@@ -207,14 +210,8 @@ public class Parser {
             JSONObject ref;
             ref=references.peek();
             String value;
-            if(isANumber){
-                value=ref.getString("number");
-                ref.remove("number");
-            }
-            else{
-                value=ref.getString("identifier");
-                ref.remove("identifier");
-            }
+            value=ref.getString("rightOperand");
+            ref.remove("rightOperand");
             JSONObject obj=new JSONObject();
             ref.put("operation",obj);
             references.push(obj);
@@ -229,14 +226,8 @@ public class Parser {
             JSONObject ref;
             ref=references.peek();
             String value;
-            if(isANumber){
-                value=ref.getString("number");
-                ref.remove("number");
-            }
-            else{
-                value=ref.getString("identifier");
-                ref.remove("identifier");
-            }
+            value=ref.getString("rightOperand");
+            ref.remove("rightOperand");
             JSONObject obj=new JSONObject();
             ref.put("operation",obj);
             references.push(obj);
@@ -263,14 +254,8 @@ public class Parser {
                 op = "+";
             else
                 op="-";
-            if(isANumber){
-                value=ref.getString("number");
-                ref.remove("number");
-            }
-            else{
-                value=ref.getString("identifier");
-                ref.remove("identifier");
-            }
+            value=ref.getString("rightOperand");
+            ref.remove("rightOperand");
             JSONObject obj=new JSONObject();
             ref.put("operation",obj);
             references.push(obj);
@@ -279,7 +264,7 @@ public class Parser {
             obj.put("leftOperand",value);
             term();
             references.pop();
-            }
+        }
     }
 
     public void term(){
@@ -296,14 +281,8 @@ public class Parser {
                 op = "*";
             else
                 op="/";
-            if(isANumber){
-                value=ref.getString("number");
-                ref.remove("number");
-            }
-            else{
-                value=ref.getString("identifier");
-                ref.remove("identifier");
-            }
+            value=ref.getString("rightOperand");
+            ref.remove("rightOperand");
             JSONObject obj=new JSONObject();
             ref.put("operation",obj);
             references.push(obj);
@@ -324,18 +303,19 @@ public class Parser {
         }
         else if(isInteger(s)){
             JSONObject ref=references.peek();
-            ref.put("number",tokens.get(currentIndex).getValue());
+            ref.put("rightOperand",tokens.get(currentIndex).getValue());
             currentIndex++;
             isANumber=true;
         }
         else if(tokens.get(currentIndex).getType().equals(Constants.IDENTIFIER)){
             JSONObject ref=references.peek();
-            ref.put("identifier",tokens.get(currentIndex).getValue());
+            ref.put("rightOperand",tokens.get(currentIndex).getValue());
             currentIndex++;
             isANumber=false;
         }
         else{
-            //error
+            AlertBox alertBox=new AlertBox();
+            alertBox.display("Error","syntax error");
         }
 
     }
