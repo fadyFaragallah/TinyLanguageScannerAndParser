@@ -80,6 +80,11 @@ public class Parser {
     }
 
     private void statement(){
+        JSONObject ref,obj;
+        ref=references.peek();
+        obj=new JSONObject();
+        ref.put(Integer.toString(numberOfAss++),obj);
+        references.push(obj);
         if(tokens.get(currentIndex).getValue().equals("if"))
             if_stmt();
         else if(tokens.get(currentIndex).getValue().equals("repeat"))
@@ -94,6 +99,7 @@ public class Parser {
             AlertBox alertBox=new AlertBox();
             alertBox.display("Error","syntax error");
         }
+        references.pop();
     }
 
     private void if_stmt(){
@@ -170,8 +176,7 @@ public class Parser {
         JSONObject ref;
         ref=references.peek();
         JSONObject obj=new JSONObject();
-        ref.put("assign"+Integer.toString(numberOfAss),obj);
-        numberOfAss++;
+        ref.put("assign",obj);
         obj.put("IdentifierName",tokens.get(currentIndex).getValue());
         matchType(Constants.IDENTIFIER);
         match(":=");
@@ -209,6 +214,11 @@ public class Parser {
         if(tokens.get(currentIndex).getValue().equals("<")){
             JSONObject ref;
             ref=references.peek();
+            JSONObject temp=ref;
+            while(temp.has("operation")){
+                temp=temp.getJSONObject("operation");
+            }
+            ref=temp;
             String value;
             value=ref.getString("rightOperand");
             ref.remove("rightOperand");
@@ -222,9 +232,14 @@ public class Parser {
 
             references.pop();
         }
-        else if(tokens.get(currentIndex).getValue().equals("=" )){
+        else if(tokens.get(currentIndex).getValue().equals("=")){
             JSONObject ref;
             ref=references.peek();
+            JSONObject temp=ref;
+            while(temp.has("operation")){
+                temp=temp.getJSONObject("operation");
+            }
+            ref=temp;
             String value;
             value=ref.getString("rightOperand");
             ref.remove("rightOperand");
@@ -254,6 +269,11 @@ public class Parser {
                 op = "+";
             else
                 op="-";
+            JSONObject temp=ref;
+            while(temp.has("operation")){
+                temp=temp.getJSONObject("operation");
+            }
+            ref=temp;
             value=ref.getString("rightOperand");
             ref.remove("rightOperand");
             JSONObject obj=new JSONObject();
@@ -281,6 +301,11 @@ public class Parser {
                 op = "*";
             else
                 op="/";
+            JSONObject temp=ref;
+            while(temp.has("operation")){
+                temp=temp.getJSONObject("operation");
+            }
+            ref=temp;
             value=ref.getString("rightOperand");
             ref.remove("rightOperand");
             JSONObject obj=new JSONObject();
@@ -302,6 +327,13 @@ public class Parser {
             match(")");
         }
         else if(isInteger(s)){
+            JSONObject ref=references.peek();
+            ref.put("rightOperand",tokens.get(currentIndex).getValue());
+            currentIndex++;
+            isANumber=true;
+        }
+        else if(s.equals("-")){
+            match("-");
             JSONObject ref=references.peek();
             ref.put("rightOperand",tokens.get(currentIndex).getValue());
             currentIndex++;
