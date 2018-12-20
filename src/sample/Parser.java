@@ -71,11 +71,14 @@ public class Parser {
 
     private void stmt_sequence(){
         statement();
+
         while(tokens.get(currentIndex).getValue().equals(";")){
             match(";");
             if(currentIndex==tokens.size())
                 return;
             statement();
+            if(currentIndex==tokens.size())
+                break;
         }
     }
 
