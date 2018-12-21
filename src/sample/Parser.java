@@ -71,11 +71,10 @@ public class Parser {
 
     private void stmt_sequence(){
         statement();
-
+        if(currentIndex==tokens.size())
+            return;
         while(tokens.get(currentIndex).getValue().equals(";")){
             match(";");
-            if(currentIndex==tokens.size())
-                return;
             statement();
             if(currentIndex==tokens.size())
                 break;
@@ -114,11 +113,7 @@ public class Parser {
         references.push(obj);
 
         ref=references.peek();
-        obj=new JSONObject();
-        ref.put("testPart",obj);
-        references.push(obj);
-        exp();
-        references.pop();
+        ref.put("testPart",exp());
 
         match("then");
 
@@ -165,13 +160,8 @@ public class Parser {
         match("until");
 
         ref=references.peek();
-        obj=new JSONObject();
-        ref.put("repeatTest",obj);
-        references.push(obj);
+        ref.put("repeatTest",exp());
 
-        exp();
-
-        references.pop();
         references.pop();
     }
 
@@ -183,11 +173,8 @@ public class Parser {
         obj.put("IdentifierName",tokens.get(currentIndex).getValue());
         matchType(Constants.IDENTIFIER);
         match(":=");
-        references.push(obj);
+        obj.put("rightOperand",exp());
 
-        exp();
-
-        references.pop();
     }
 
     private void read_stmt(){
@@ -202,149 +189,96 @@ public class Parser {
         JSONObject ref;
         ref=references.peek();
         JSONObject obj=new JSONObject();
-        ref.put("writeStatement",obj);
-        references.push(obj);
+        ref.put("writeStatement",exp());
 
-        exp();
-
-        references.pop();
     }
 
-    public void exp(){
-        simple_exp();
+    public JSONObject exp(){
+        JSONObject temp=simple_exp();
         if(currentIndex==tokens.size())
-            return;
-        if(tokens.get(currentIndex).getValue().equals("<")){
-            JSONObject ref;
-            ref=references.peek();
-            JSONObject temp=ref;
-            while(temp.has("operation")){
-                temp=temp.getJSONObject("operation");
-            }
-            ref=temp;
-            String value;
-            value=ref.getString("rightOperand");
-            ref.remove("rightOperand");
-            JSONObject obj=new JSONObject();
-            ref.put("operation",obj);
-            references.push(obj);
-            match("<");
-            obj.put("op","<");
-            obj.put("leftOperand",value);
-            simple_exp();
-
-            references.pop();
+            return temp;
+        if((tokens.get(currentIndex).getValue().equals("<")) ||
+                (tokens.get(currentIndex).getValue().equals("="))){
+            String op=tokens.get(currentIndex).getValue();
+            currentIndex++;
+            JSONObject newTemp=new JSONObject();
+            newTemp.put("op",op);
+            newTemp.put("leftOperand",temp);
+            newTemp.put("rightOperand",simple_exp());
+            JSONObject x=new JSONObject();
+            x.put("operation",newTemp);
+            temp=x;
         }
-        else if(tokens.get(currentIndex).getValue().equals("=")){
-            JSONObject ref;
-            ref=references.peek();
-            JSONObject temp=ref;
-            while(temp.has("operation")){
-                temp=temp.getJSONObject("operation");
-            }
-            ref=temp;
-            String value;
-            value=ref.getString("rightOperand");
-            ref.remove("rightOperand");
-            JSONObject obj=new JSONObject();
-            ref.put("operation",obj);
-            references.push(obj);
-            match("=");
-            obj.put("op","=");
-            obj.put("leftOperand",value);
-            simple_exp();
-
-            references.pop();
-        }
+        return temp;
     }
 
-    public void simple_exp(){
-        term();
+    public JSONObject simple_exp(){
+        JSONObject temp=term();
         if(currentIndex==tokens.size())
-            return;
-        while(tokens.get(currentIndex).getValue().equals("+") ||
-                tokens.get(currentIndex).getValue().equals("-")){
-            JSONObject ref;
-            ref=references.peek();
-            String value;
+            return temp;
+        while((currentIndex!=tokens.size()) && (tokens.get(currentIndex).getValue().equals("+") ||
+                tokens.get(currentIndex).getValue().equals("-"))){
             String op;
             if(tokens.get(currentIndex).getValue().equals("+"))
                 op = "+";
             else
                 op="-";
-            JSONObject temp=ref;
-            while(temp.has("operation")){
-                temp=temp.getJSONObject("operation");
-            }
-            ref=temp;
-            value=ref.getString("rightOperand");
-            ref.remove("rightOperand");
-            JSONObject obj=new JSONObject();
-            ref.put("operation",obj);
-            references.push(obj);
-            match(op);
-            obj.put("op",op);
-            obj.put("leftOperand",value);
-            term();
-            references.pop();
+            currentIndex++;
+            JSONObject newTemp=new JSONObject();
+            newTemp.put("op",op);
+            newTemp.put("leftOperand",temp);
+            newTemp.put("rightOperand",term());
+            JSONObject x=new JSONObject();
+            x.put("operation",newTemp);
+            temp=x;
         }
+        return  temp;
     }
 
-    public void term(){
-        factor();
+    public JSONObject term(){
+        JSONObject temp=factor();
         if(currentIndex==tokens.size())
-            return;
-        while(tokens.get(currentIndex).getValue().equals("*") ||
-                tokens.get(currentIndex).getValue().equals("/")){
-            JSONObject ref;
-            ref=references.peek();
-            String value;
+            return temp;
+        while((currentIndex!=tokens.size()) && (tokens.get(currentIndex).getValue().equals("*") ||
+                tokens.get(currentIndex).getValue().equals("/"))){
             String op;
             if(tokens.get(currentIndex).getValue().equals("*"))
                 op = "*";
             else
                 op="/";
-            JSONObject temp=ref;
-            while(temp.has("operation")){
-                temp=temp.getJSONObject("operation");
-            }
-            ref=temp;
-            value=ref.getString("rightOperand");
-            ref.remove("rightOperand");
-            JSONObject obj=new JSONObject();
-            ref.put("operation",obj);
-            references.push(obj);
-            match(op);
-            obj.put("op",op);
-            obj.put("leftOperand",value);
-            factor();
-            references.pop();
+            currentIndex++;
+            JSONObject newTemp=new JSONObject();
+            newTemp.put("op",op);
+            newTemp.put("leftOperand",temp);
+            newTemp.put("rightOperand",factor());
+            JSONObject x=new JSONObject();
+            x.put("operation",newTemp);
+            temp=x;
         }
+        return  temp;
     }
 
-    public void factor(){
+    public JSONObject factor(){
+        JSONObject temp=new JSONObject();
         String s=tokens.get(currentIndex).getValue();
         if(s.equals("(")){
             match("(");
-            exp();
+            temp=exp();
             match(")");
         }
         else if(isInteger(s)){
-            JSONObject ref=references.peek();
-            ref.put("rightOperand",tokens.get(currentIndex).getValue());
+            temp.put("number",tokens.get(currentIndex).getValue());
             currentIndex++;
             isANumber=true;
         }
         else if(s.equals("-")){
             match("-");
-            JSONObject ref=references.peek();
-            ref.put("rightOperand",tokens.get(currentIndex).getValue());
+            temp.put("number","-"+tokens.get(currentIndex).getValue());
             currentIndex++;
             isANumber=true;
         }
         else if(tokens.get(currentIndex).getType().equals(Constants.IDENTIFIER)){
-            JSONObject ref=references.peek();
-            ref.put("rightOperand",tokens.get(currentIndex).getValue());
+            temp.put("identifier",tokens.get(currentIndex).getValue());
             currentIndex++;
             isANumber=false;
         }
@@ -352,7 +286,7 @@ public class Parser {
             AlertBox alertBox=new AlertBox();
             alertBox.display("Error","syntax error");
         }
-
+        return temp;
     }
 
 }

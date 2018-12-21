@@ -14,7 +14,6 @@
     <root id="root">
       <element id="archive" name="Scanner_Project.jar">
         <element id="module-output" name="Scanner Project" />
-        <element id="library" level="project" name="json-20180813" />
       </element>
     </root>
   </artifact>
