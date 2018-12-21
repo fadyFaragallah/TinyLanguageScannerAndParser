@@ -15,7 +15,7 @@
       <element id="archive" name="Scanner_Project.jar">
         <element id="module-output" name="Scanner Project" />
       </element>
-      <element id="extracted-dir" path="$USER_HOME$/Downloads/json-20180813.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/json-20180813.jar" path-in-jar="/" />
       <element id="file-copy" path="$PROJECT_DIR$/index.html" />
     </root>
   </artifact>
