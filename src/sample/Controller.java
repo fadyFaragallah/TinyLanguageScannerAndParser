@@ -79,7 +79,8 @@ public class Controller implements Initializable{
         //s.replace('[',' ');
         //s.replace('[',' ');
 
-        outputTextArea.setText(s);
+        String formatted = obj.toString(4);
+        outputTextArea.setText(formatted);
         try{
             PrintStream out = new PrintStream(new FileOutputStream("output.js"));
             out.print("var myObj="+s);
@@ -94,6 +95,7 @@ public class Controller implements Initializable{
         Scene secondScene = new Scene(secondaryLayout, 1000, 700);
         WebView browser = new WebView();
         WebEngine webEngine = browser.getEngine();
+        webEngine.executeScript("let varname = "+s);
         browser.sceneProperty().addListener(new ChangeListener<Scene>() {
 
             @Override
